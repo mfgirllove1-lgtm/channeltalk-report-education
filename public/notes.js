@@ -79,11 +79,32 @@ WAPE = SUM( |실제 - 예측| ) / SUM( 실제 ) × 100   (인입량이 적은 �
   <div class="q">Q7. (실습) 이 데이터로 "이번 달 인력 운영 현황"을 3분 안에 브리핑해야 한다면 어떤 쿼리/지표를 준비하시겠어요?</div>
   <div class="a">권장 체크리스트: ① 채널별 서비스레벨 달성 여부 ② 예측 정확도(MAPE) ③ shrinkage율 상위 구간 ④ 팀/고용형태별 인건비와 건당 비용 ⑤ 문의 유형 TOP5(개선 포인트). "SQL 연습문제" 탭에서 각 카테고리 문제를 이어서 풀어보면 이 브리핑을 그대로 준비할 수 있습니다.</div>
 </div>
+<div class="qa-item">
+  <div class="q">Q8. Genesys(제네시스) 같은 CX 솔루션을 다뤄본 경험이 있나요? 없다면 어떻게 답해야 할까요?</div>
+  <div class="a">써본 적이 있다면 어떤 모듈(Forecast/Schedule/실시간 관제 화면)을 주로 썼고, 거기서 뽑은 데이터를 어떻게 가공했는지 구체적으로 말하세요. 안 써봤다면 솔직히 인정하되 "인터벌 단위 예측·스케줄·실시간 준수율(RTA)이라는 개념 자체는 도구가 달라도 동일하고, 실제로 채팅/전화 데이터를 이 개념으로 분석해봤다"는 식으로 개념 이해도를 강조하세요. 아래 6번 섹션의 용어 매핑표를 보면서 준비하면 좋습니다.</div>
+</div>
 
-<h2>6. 실전 팁</h2>
+<h2>6. 쏘카가 쓰는 CX 솔루션 — 제네시스(Genesys)</h2>
+<p>쏘카 채용공고 우대사항에도 명시된 <b>Genesys Cloud CX</b>는 콜/채팅/이메일 등 옴니채널 상담을 처리하는 CCaaS(Contact Center as a Service) 플랫폼입니다. 그 안의 <b>WEM(Workforce Engagement Management)</b> 모듈이 예측·스케줄링·실시간 준수율(RTA) 기능을 제공합니다. SQL 실무에서는 보통 Genesys가 쌓은 원본 인터랙션 데이터를 BigQuery 등 DW로 내려받아(ETL) 분석하는 구조이기 때문에, "Genesys 화면에서 본 지표를 SQL로 검증/재가공한 경험"이 실무형 어필 포인트가 됩니다.</p>
+
+<h3>Genesys 용어 ↔ 이 실습 DB 매핑</h3>
+<table style="width:100%;border-collapse:collapse;font-size:13px;margin:10px 0;">
+  <tr style="background:#1d2740;"><th style="text-align:left;padding:6px 10px;color:#6ee7b7;">Genesys 용어</th><th style="text-align:left;padding:6px 10px;color:#6ee7b7;">의미</th><th style="text-align:left;padding:6px 10px;color:#6ee7b7;">이 실습 DB</th></tr>
+  <tr><td style="padding:6px 10px;border-top:1px solid #2a3455;">Interaction</td><td style="padding:6px 10px;border-top:1px solid #2a3455;">고객과의 개별 상담 1건</td><td style="padding:6px 10px;border-top:1px solid #2a3455;"><code>contacts</code> 1행</td></tr>
+  <tr><td style="padding:6px 10px;border-top:1px solid #2a3455;">Media Type</td><td style="padding:6px 10px;border-top:1px solid #2a3455;">Voice/Chat/Email 등 채널 구분</td><td style="padding:6px 10px;border-top:1px solid #2a3455;"><code>channel</code></td></tr>
+  <tr><td style="padding:6px 10px;border-top:1px solid #2a3455;">Forecast (WEM)</td><td style="padding:6px 10px;border-top:1px solid #2a3455;">인터벌 단위 인입량/AHT 예측</td><td style="padding:6px 10px;border-top:1px solid #2a3455;"><code>interval_volume.forecast_volume / forecast_aht_sec</code></td></tr>
+  <tr><td style="padding:6px 10px;border-top:1px solid #2a3455;">Schedule</td><td style="padding:6px 10px;border-top:1px solid #2a3455;">에이전트별 근무 스케줄</td><td style="padding:6px 10px;border-top:1px solid #2a3455;"><code>shifts</code></td></tr>
+  <tr><td style="padding:6px 10px;border-top:1px solid #2a3455;">RTA (Real-Time Adherence)</td><td style="padding:6px 10px;border-top:1px solid #2a3455;">스케줄 대비 실제 근태 준수율 실시간 모니터링</td><td style="padding:6px 10px;border-top:1px solid #2a3455;"><code>interval_staffing.scheduled_agents</code> vs <code>actual_agents</code></td></tr>
+  <tr><td style="padding:6px 10px;border-top:1px solid #2a3455;">Service Level</td><td style="padding:6px 10px;border-top:1px solid #2a3455;">목표시간 내 응대율</td><td style="padding:6px 10px;border-top:1px solid #2a3455;"><code>interval_volume.answered_within_target</code></td></tr>
+  <tr><td style="padding:6px 10px;border-top:1px solid #2a3455;">Queue / Agent Group</td><td style="padding:6px 10px;border-top:1px solid #2a3455;">채널·팀별 상담 대기열/그룹</td><td style="padding:6px 10px;border-top:1px solid #2a3455;"><code>channel</code>, <code>agents.team</code></td></tr>
+</table>
+<p>실무에서 자주 나오는 표현도 챙겨두면 좋습니다: <b>Adherence(근태 준수율)</b> = RTA 화면에서 상담사가 스케줄대로 로그인/휴게를 지켰는지의 비율, <b>Conformance</b> = 하루 전체 근무시간 총량 준수 여부(시간대는 달라도 총량만 맞으면 인정). 이 실습 DB의 shifts.status(연차/병가/결근)와 interval_staffing의 scheduled vs actual 차이가 바로 이 개념을 SQL로 재현한 것입니다.</p>
+
+<h2>7. 실전 팁</h2>
 <ul>
   <li>SQL 문제를 풀 때 <b>결과 숫자 자체보다 "왜 이 지표를 이렇게 정의했는가"</b>를 말로 설명하는 연습을 함께 하세요. 면접관은 쿼리 문법보다 지표 설계 감각을 봅니다.</li>
   <li>경력 5년차 포지션이므로, 단순 실무 숙련도보다 <b>정책/기준을 개선한 경험</b>(예: shrinkage 산정 기준을 바꿔 서비스레벨을 몇 %p 개선)을 구체적 수치로 말할 수 있어야 합니다.</li>
   <li>장애인 우대 전형이 명시되어 있으니, 필요한 경우 편의 지원 요청 사항을 면접 전 채용 담당자에게 미리 안내받는 것도 좋습니다.</li>
+  <li>Genesys를 직접 안 써봤다면 숨기지 말고, "개념(예측/스케줄/RTA)은 도구 불문 동일하다"는 전제로 이 실습 DB에서 연습한 내용을 근거로 자신 있게 설명하세요.</li>
 </ul>
 `;
