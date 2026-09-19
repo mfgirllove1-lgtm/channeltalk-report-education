@@ -1,5 +1,50 @@
 // WFM 개념 노트 + 예상 면접질문 (쏘카 고객센터 WFM 매니저 공고 기준)
 const NOTES_HTML = `
+<h2>0. SQL 문법 핵심 정리 (초보자용 치트시트)</h2>
+<p>SQL이 처음이라면 <b>"SQL 연습문제" 탭의 <code>0. SQL 기초 다지기</code> 카테고리부터</b> 순서대로 풀어보세요. 아래는 그 문제들을 풀 때 참고할 최소한의 문법 정리입니다.</p>
+
+<h3>쿼리의 기본 골격</h3>
+<div class="formula-box">SELECT 컬럼1, 컬럼2        -- 어떤 컬럼을 볼지
+FROM 테이블명              -- 어느 테이블에서
+WHERE 조건                -- 개별 행을 거르는 조건 (그룹핑 전)
+GROUP BY 컬럼              -- 같은 값끼리 묶기
+HAVING 조건                -- 묶고 집계한 결과를 거르는 조건 (그룹핑 후)
+ORDER BY 컬럼 [ASC|DESC]   -- 정렬
+LIMIT 개수;                -- 결과 개수 제한</div>
+<p>이 순서 그대로 쓰면 됩니다. 다만 <b>WHERE에는 집계함수(COUNT, AVG 등)를 쓸 수 없고</b>, 집계 결과를 다시 거르고 싶으면 반드시 <code>HAVING</code>을 써야 한다는 점이 초보자들이 가장 많이 헷갈리는 부분입니다.</p>
+
+<h3>자주 쓰는 것들</h3>
+<ul>
+  <li><b>비교연산자</b>: <code>=</code> <code>!=</code> <code>&gt;</code> <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code></li>
+  <li><b>논리연산자</b>: <code>AND</code>(둘 다 만족) · <code>OR</code>(둘 중 하나) · <code>NOT</code>(부정)</li>
+  <li><b>범위/목록</b>: <code>BETWEEN 10 AND 20</code>, <code>IN ('채팅','전화')</code></li>
+  <li><b>문자열 패턴</b>: <code>LIKE '%예약%'</code> (% 는 아무 글자나 몇 개든 매칭)</li>
+  <li><b>집계함수</b>: <code>COUNT(*)</code> 행 개수 · <code>SUM()</code> 합계 · <code>AVG()</code> 평균 · <code>MIN()</code>/<code>MAX()</code> 최소/최대</li>
+  <li><b>별칭(alias)</b>: <code>SELECT AVG(wait_sec) AS avg_wait</code> — 결과 컬럼명을 보기 좋게 바꿔줌. 테이블에도 <code>FROM contacts c</code>처럼 별칭을 줄 수 있음</li>
+  <li><b>NULL 처리</b>: NULL은 <code>= NULL</code>이 아니라 <code>IS NULL</code> / <code>IS NOT NULL</code>로 비교</li>
+</ul>
+
+<h3>JOIN, 두려워하지 마세요</h3>
+<p>두 테이블을 <b>공통 컬럼(대개 ID)</b>으로 옆으로 이어붙이는 것뿐입니다. 예: 상담 기록(<code>contacts</code>)에는 상담사 이름이 없고 <code>agent_id</code>만 있는데, 이름은 <code>agents</code> 테이블에 있음 → 둘을 <code>agent_id</code>로 연결해서 이름을 가져옵니다.</p>
+<div class="formula-box">SELECT c.contact_id, a.name
+FROM contacts c
+JOIN agents a ON a.agent_id = c.agent_id;</div>
+<ul>
+  <li><b>INNER JOIN</b>(그냥 <code>JOIN</code>): 양쪽 테이블에 다 있는 것만 남김</li>
+  <li><b>LEFT JOIN</b>: 왼쪽 테이블은 다 남기고, 오른쪽에 매칭이 없으면 NULL로 채움 (예: 포기 건은 agent_id가 없어서 LEFT JOIN 하면 상담사 이름이 NULL로 나옴)</li>
+</ul>
+
+<h3>학습 순서 추천 (면접 전까지)</h3>
+<ol>
+  <li><b>1일차</b>: "SQL 기초 다지기" 입문1~7 (SELECT/WHERE/ORDER BY/COUNT) — 위 치트시트 보면서 천천히</li>
+  <li><b>2일차</b>: 입문8~13 (GROUP BY/HAVING/JOIN) — 여기가 제일 중요합니다. 막히면 모범답안을 에디터에 채우고 한 줄씩 지워가며 왜 필요한지 확인해보세요</li>
+  <li><b>3일차</b>: "1. 인입 예측" 카테고리 (쉬움→중간 순서로)</li>
+  <li><b>4일차</b>: "2. 인력 계획" + "3. 비용 관리" 카테고리 중 '쉬움'·'중간' 문제 위주</li>
+  <li><b>5일차 이후</b>: "4. 성과 지표" 카테고리 + 전날까지 헷갈렸던 문제 다시 풀기 + 아래 개념 노트 정독</li>
+  <li><b>면접 당일 아침</b>: "데이터 스키마" 탭 한번 훑고, MAPE/서비스레벨/shrinkage 공식만 다시 확인</li>
+</ol>
+<p>'어려움' 난이도 문제(JOIN+GROUP BY+서브쿼리 조합)는 못 풀어도 괜찮습니다. 면접관도 실무형 WFM 매니저에게 복잡한 쿼리를 처음부터 완벽히 짜라고 요구하기보다, <b>기본 SQL로 원하는 숫자를 뽑아낼 수 있는지 + 그 숫자가 뭘 의미하는지 설명할 수 있는지</b>를 더 중요하게 봅니다.</p>
+
 <h2>1. WFM의 기본 업무 흐름</h2>
 <p>공고에 나온 4가지 업무(예측 → 인력계획/운영 → 비용관리 → 성과지표 관리)는 사실 하나의 순환 루프입니다. 면접에서 "WFM이 뭐라고 생각하세요?"라는 질문을 받으면 이 루프로 답하는 것이 정리하기 좋습니다.</p>
 <div class="formula-box">인입 예측 (Forecast) → 필요인원 산정 (Capacity Plan) → 스케줄 편성 (Scheduling)

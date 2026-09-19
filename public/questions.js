@@ -3,6 +3,121 @@
 
 const QUESTION_BANK = [
   {
+    category: "0. SQL 기초 다지기 (처음이라면 여기부터)",
+    items: [
+      {
+        title: "[입문1] 테이블 전체 조회",
+        level: "입문",
+        prompt: "agents 테이블의 모든 컬럼을 조회하되, 결과가 너무 많지 않게 상위 10건만 보세요.",
+        hint: "기본 문법: SELECT * FROM 테이블명 LIMIT 건수;  ← *는 '모든 컬럼'이라는 뜻이고, LIMIT은 결과 개수를 제한합니다.",
+        solution: `SELECT * FROM agents LIMIT 10;`,
+      },
+      {
+        title: "[입문2] 원하는 컬럼만 골라 조회",
+        level: "입문",
+        prompt: "agents 테이블에서 name(이름)과 team(팀) 두 컬럼만 조회하세요.",
+        hint: "SELECT 뒤에 * 대신 컬럼명을 콤마(,)로 나열하면 그 컬럼들만 조회됩니다. 예: SELECT 컬럼A, 컬럼B FROM 테이블명;",
+        solution: `SELECT name, team FROM agents;`,
+      },
+      {
+        title: "[입문3] 조건으로 필터링 (WHERE)",
+        level: "입문",
+        prompt: "agents 테이블에서 team이 'B팀'인 상담사만 조회하세요.",
+        hint: "WHERE 절로 조건을 겁니다. 문자열 값은 작은따옴표로 감싸야 해요. 예: SELECT * FROM 테이블 WHERE 컬럼 = '값';",
+        solution: `SELECT * FROM agents WHERE team = 'B팀';`,
+      },
+      {
+        title: "[입문4] 숫자 조건 (비교연산자)",
+        level: "입문",
+        prompt: "agents 테이블에서 hourly_cost_krw(시급)가 18000 이상인 상담사를 조회하세요.",
+        hint: "숫자는 따옴표 없이 씁니다. 비교연산자: = , != , > , < , >= , <=",
+        solution: `SELECT * FROM agents WHERE hourly_cost_krw >= 18000;`,
+      },
+      {
+        title: "[입문5] 여러 조건 조합 (AND/OR)",
+        level: "입문",
+        prompt: "agents 테이블에서 team이 'A팀'이면서 skill_level이 3인 상담사를 조회하세요.",
+        hint: "두 조건을 모두 만족해야 하면 AND, 둘 중 하나만 만족해도 되면 OR을 씁니다.",
+        solution: `SELECT * FROM agents WHERE team = 'A팀' AND skill_level = 3;`,
+      },
+      {
+        title: "[입문6] 정렬하기 (ORDER BY)",
+        level: "입문",
+        prompt: "agents 테이블을 시급(hourly_cost_krw)이 높은 순으로 정렬해서 상위 5명만 보세요.",
+        hint: "ORDER BY 컬럼명 DESC 는 내림차순(큰 값부터), ASC는 오름차순(기본값)입니다. LIMIT과 함께 쓸 수 있습니다.",
+        solution: `SELECT * FROM agents ORDER BY hourly_cost_krw DESC LIMIT 5;`,
+      },
+      {
+        title: "[입문7] 전체 건수 세기 (COUNT)",
+        level: "입문",
+        prompt: "contacts 테이블에서 전체 상담 건수가 몇 건인지 구하세요.",
+        hint: "COUNT(*)는 조건에 맞는 행(row)의 개수를 세는 집계함수입니다.",
+        solution: `SELECT COUNT(*) FROM contacts;`,
+      },
+      {
+        title: "[입문8] 조건부 건수 & 평균 (COUNT/AVG + WHERE)",
+        level: "입문",
+        prompt: "contacts 테이블에서 resolved(해결여부)가 1인 건들의 개수와, 그 건들의 평균 처리시간(handle_sec)을 함께 구하세요.",
+        hint: "SELECT 절에 COUNT(*), AVG(컬럼)처럼 집계함수를 여러 개 나열할 수 있습니다. WHERE로 먼저 resolved=1인 행만 걸러내세요.",
+        solution: `SELECT COUNT(*) AS resolved_cnt, AVG(handle_sec) AS avg_handle_sec
+FROM contacts
+WHERE resolved = 1;`,
+      },
+      {
+        title: "[입문9] 그룹별로 집계하기 (GROUP BY)",
+        level: "입문",
+        prompt: "contacts 테이블에서 채널(channel)별 상담 건수를 구하세요.",
+        hint: "GROUP BY는 '같은 값끼리 묶어서' 집계함수를 적용합니다. SELECT에 쓴 집계 안 된 컬럼(channel)은 GROUP BY에도 똑같이 써줘야 합니다.",
+        solution: `SELECT channel, COUNT(*) AS cnt
+FROM contacts
+GROUP BY channel;`,
+      },
+      {
+        title: "[입문10] GROUP BY + 여러 집계함수",
+        level: "입문",
+        prompt: "contacts 테이블에서 채널별로 건수와 평균 대기시간(wait_sec)을 함께 구하고, 평균 대기시간이 긴 순으로 정렬하세요.",
+        hint: "GROUP BY로 묶은 뒤에도 ORDER BY를 쓸 수 있습니다. 집계함수 결과(AVG(...))에 별칭(AS)을 주면 ORDER BY에서 그 별칭을 바로 쓸 수 있어요.",
+        solution: `SELECT channel, COUNT(*) AS cnt, ROUND(AVG(wait_sec), 1) AS avg_wait
+FROM contacts
+GROUP BY channel
+ORDER BY avg_wait DESC;`,
+      },
+      {
+        title: "[입문11] 그룹 결과 다시 필터링 (HAVING)",
+        level: "입문",
+        prompt: "상담사별(agent_id) 처리건수(resolved=1)를 구하고, 그 중 30건 이상 처리한 상담사만 보여주세요.",
+        hint: "WHERE는 그룹으로 묶기 '전' 개별 행을 거르고, HAVING은 GROUP BY로 묶고 집계까지 한 '후' 결과를 거릅니다. COUNT(*) >= 30 같은 조건은 WHERE가 아니라 HAVING에 써야 합니다.",
+        solution: `SELECT agent_id, COUNT(*) AS resolved_cnt
+FROM contacts
+WHERE resolved = 1
+GROUP BY agent_id
+HAVING resolved_cnt >= 30;`,
+      },
+      {
+        title: "[입문12] 두 테이블 연결하기 (INNER JOIN)",
+        level: "입문",
+        prompt: "contacts와 agents 테이블을 연결해서, 상담 건마다 상담사 이름(name)이 함께 보이도록 상위 10건을 조회하세요.",
+        hint: "두 테이블은 agents.agent_id = contacts.agent_id 로 서로 연결됩니다. JOIN 문법: SELECT ... FROM 테이블A a JOIN 테이블B b ON a.연결컬럼 = b.연결컬럼;  (a, b는 테이블에 붙인 별칭)",
+        solution: `SELECT c.contact_id, c.channel, c.handle_sec, a.name AS agent_name
+FROM contacts c
+JOIN agents a ON a.agent_id = c.agent_id
+LIMIT 10;`,
+      },
+      {
+        title: "[입문13] JOIN + GROUP BY 함께 쓰기",
+        level: "입문",
+        prompt: "상담사 이름별로 처리건수(resolved=1)를 구하고, 많이 처리한 순으로 정렬하세요.",
+        hint: "지금까지 배운 JOIN과 GROUP BY를 합치면 됩니다. 순서: FROM → JOIN → WHERE → GROUP BY → ORDER BY. 이 순서를 외워두면 복잡한 쿼리도 차근차근 조립할 수 있어요.",
+        solution: `SELECT a.name, COUNT(*) AS resolved_cnt
+FROM contacts c
+JOIN agents a ON a.agent_id = c.agent_id
+WHERE c.resolved = 1
+GROUP BY a.name
+ORDER BY resolved_cnt DESC;`,
+      },
+    ],
+  },
+  {
     category: "1. 인입 예측 (Forecasting)",
     items: [
       {
