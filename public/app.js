@@ -86,6 +86,29 @@ document.getElementById("sql-editor").addEventListener("keydown", (e) => {
   }
 });
 
+// ---------- 테이블 미리보기 버튼 ----------
+const PREVIEW_TABLES = [
+  "agents",
+  "shifts",
+  "interval_staffing",
+  "interval_volume",
+  "contacts",
+  "sla_targets",
+  "monthly_costs",
+];
+
+const previewBtns = document.getElementById("preview-btns");
+PREVIEW_TABLES.forEach((table) => {
+  const btn = document.createElement("button");
+  btn.textContent = table;
+  btn.addEventListener("click", () => {
+    const sql = `SELECT * FROM ${table} LIMIT 10;`;
+    document.getElementById("sql-editor").value = sql;
+    runQuery(sql);
+  });
+  previewBtns.appendChild(btn);
+});
+
 // ---------- 사이드바: 문제 목록 렌더링 ----------
 const sidebar = document.getElementById("sidebar");
 
